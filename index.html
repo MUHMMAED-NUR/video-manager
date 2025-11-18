@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>مدير روابط الفيديو — أوفلاين</title>
 <style>
+/* ... (كود CSS كامل كما هو في التعديل الأخير) ... */
 :root{--bg:#f3f3f3;--card:#fafafa;--accent:#007bff;--note:#e6e6e6;--text:#111;--color-rec:#4CAF50;--color-rej:#F44336;--light-rec:#e6ffef;--light-rej:#ffecec}
 body{font-family:Arial;margin:0;padding:18px;background:var(--bg);color:var(--text)}
 .header{display:flex;justify-content:flex-end;gap:10px;align-items:center}
@@ -121,9 +122,7 @@ h2{font-size: 28px; margin-bottom: 15px;}
 #textIdeaList li{border-bottom:1px solid #eee;padding:10px 0}
 </style>
 </head>
-<body>
-
-<div class="header">
+<body id="appBody" style="display: none;"> <div class="header">
   <label class="small-note">وضع ليلي</label>
   <button class="btn" onclick="toggleNight()">تبديل الليل</button>
 </div>
@@ -178,6 +177,21 @@ h2{font-size: 28px; margin-bottom: 15px;}
 </div>
 
 <script>
+// 🔑 دالة التحقق من كلمة المرور
+function checkPassword() {
+    const correctPassword = "963507";
+    let inputPassword = prompt("الرجاء إدخال كلمة المرور للوصول إلى مدير الروابط:");
+
+    if (inputPassword === correctPassword) {
+        document.getElementById('appBody').style.display = 'block'; // عرض محتوى الموقع
+        init(); // تهيئة وبدء تشغيل التطبيق بعد النجاح
+    } else {
+        alert("كلمة المرور غير صحيحة. لا يمكن الوصول.");
+        // يمكنك توجيه المستخدم لصفحة أخرى أو إبقائه على صفحة بيضاء
+        document.body.innerHTML = '<h1>🚫 وصول مرفوض.</h1>';
+    }
+}
+
 // --- Helpers ---
 function extractVideoId(url){
   // يدعم روابط يوتيوب العادية، youtu.be، embed، و Shorts
@@ -426,6 +440,7 @@ function toggleNight() {
   localStorage.setItem('nightMode', document.body.classList.contains('night'));
 }
 
+// دالة التهيئة (تم تعديلها لاستدعائها بعد النجاح في إدخال كلمة المرور)
 function init() {
   if (localStorage.getItem('nightMode') === 'true') {
     document.body.classList.add('night');
@@ -433,7 +448,8 @@ function init() {
   renderAll();
 }
 
-init();
+// 🚀 بدء تشغيل عملية التحقق من كلمة المرور فور تحميل الصفحة
+window.onload = checkPassword;
 </script>
 </body>
 </html>
