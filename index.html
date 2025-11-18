@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>مدير روابط الفيديو — أوفلاين</title>
+<style>
+:root{--bg:#f3f3f3;--card:#fafafa;--accent:#007bff;--note:#e6e6e6;--text:#111;--color-rec:#4CAF50;--color-rej:#F44336;--light-rec:#e6ffef;--light-rej:#ffecec}
+body{font-family:Arial;margin:0;padding:18px;background:var(--bg);color:var(--text)}
+.header{display:flex;justify-content:flex-end;gap:10px;align-items:center}
+.btn{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;transition:background-color 0.3s ease}
+.btn:hover{background:#0056b3}
+.container{background:#fff;padding:18px;border-radius:12px;margin-top:14px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+
+/* تكبير العناوين الرئيسية */
+h2{font-size: 28px; margin-bottom: 15px;}
+.section-title{font-size:24px;margin-bottom:10px; font-weight: bold;}
+
+.input-row{display:flex;gap:10px;margin-bottom:12px}
+.input-row input, .input-row textarea{flex:1;padding:10px;border:1px solid #ddd;border-radius:8px}
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:12px}
+
+/* تحديث البطاقة - إزالة الشفافية وتطبيق التلوين */
+.video-card{
+    background:var(--card);
+    padding:12px;
+    padding-top: 40px; /* لترك مساحة لعلامة الحالة العريضة */
+    border-radius:10px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    position:relative;
+    transition: all 0.3s ease; /* تأثير لوني للانتقال */
+    border: 1px solid #ddd;
+}
+/* تلوين البطاقة عند تغيير الحالة */
+.video-card-status-recorded{
+    background: var(--light-rec);
+    border: 1px solid var(--color-rec);
+}
+.video-card-status-rejected{
+    background: var(--light-rej);
+    border: 1px solid var(--color-rej);
+}
+
+.video-card img{width:170px;height:96px;object-fit:cover;border-radius:8px}
+.note-box{background:var(--note);padding:8px;border-radius:8px;margin-top:6px}
+.play-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid #ddd;cursor:pointer;text-decoration:none}
+.play-icon{width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:16px solid #ff4d4d}
+
+/* علامة الحالة العريضة والواضحة */
+.status-label{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    width: 100%;
+    padding:8px 10px;
+    border-radius:10px 10px 0 0; 
+    font-size: 16px;
+    font-weight:700;
+    display:none;
+    z-index: 10;
+    text-align: center; 
+    box-sizing: border-box; 
+    border-bottom: 1px solid transparent; 
+}
+/* ألوان وضوح العلامات */
+.status-recorded{
+    background:#d5f3d5; 
+    color:#0a7b3f;
+    border-color: var(--color-rec); 
+    display:block
+}
+.status-rejected{
+    background:#fdd5d5;
+    color:#c12b2b;
+    border-color: var(--color-rej);
+    display:block
+}
+
+.status-controls{display:flex;flex-direction:column;gap:8px}
+.status-controls button{
+    padding:8px 10px;
+    border-radius:8px;
+    border:none;
+    color:#fff;
+    font-weight:bold;
+    cursor:pointer;
+    transition: background-color 0.3s ease, transform 0.1s;
+}
+.status-controls .btn-rec{background:var(--color-rec);}
+.status-controls .btn-rej{background:var(--color-rej);}
+
+.status-controls button:hover{
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+.delete-btn{position:absolute;top:8px;right:8px;background:#ff3b3b;color:#fff;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;transition:background-color 0.3s ease}
+.delete-btn:hover{background:#cc0000}
+
+/* تحديث وضوح العناوين الفرعية */
+.small-note{
+    font-size:18px; /* زيادة الحجم */
+    font-weight: bold; 
+    color:#111; /* جعل اللون أغمق جداً */
+    margin-top: 15px; 
+    display: block; 
+}
+
+.night{background:#111;color:#ddd}
+.night .container{background:#1b1b1b}
+.night .video-card{background:#151515}
+.night .night .note-box{background:#2a2a2a;color:#ddd}
+.night .input-row input{background:#111;color:#ddd;border:1px solid #333}
+.night #textIdeaList li{border-bottom:1px solid #333}
+.night .small-note{color:#fff;} /* لون واضح في الوضع الليلي */
+
+
+#textIdeaList{list-style:none;padding:0}
+#textIdeaList li{border-bottom:1px solid #eee;padding:10px 0}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <label class="small-note">وضع ليلي</label>
+  <button class="btn" onclick="toggleNight()">تبديل الليل</button>
+</div>
+
+<h2>📁 مدير حفظ روابط الفيديو — أوفلاين</h2>
+
+<div class="container">
+  <div class="section-title">🎥 الفيديوهات الطويلة</div>
+  <div class="input-row">
+    <button class="btn" onclick="saveVideo('long')">حفظ</button>
+    <input id="longLink" placeholder="ألصق رابط الفيديو هنا">
+    <input id="longNote" placeholder="ملاحظة (اختياري)">
+  </div>
+  <div id="longList" class="video-grid"></div>
+</div>
+
+<div class="container">
+  <div class="section-title">🎬 الفيديوهات القصيرة</div>
+
+  <div class="small-note">🟣 ردة فعل</div>
+  <div class="input-row">
+    <button class="btn" onclick="saveVideo('react')">حفظ</button>
+    <input id="shortReact" placeholder="رابط فيديو ردة فعل">
+    <input id="shortReactNote" placeholder="ملاحظة (اختياري)">
+  </div>
+  <div id="reactList" class="video-grid"></div>
+
+  <div class="small-note">🟢 تمثيل</div>
+  <div class="input-row">
+    <button class="btn" onclick="saveVideo('act')">حفظ</button>
+    <input id="shortAct" placeholder="رابط فيديو تمثيل">
+    <input id="shortActNote" placeholder="ملاحظة (اختياري)">
+  </div>
+  <div id="actList" class="video-grid"></div>
+
+  <div class="small-note">🔵 فكرة</div>
+  <div class="input-row">
+    <button class="btn" onclick="saveVideo('idea')">حفظ</button>
+    <input id="shortIdea" placeholder="رابط فيديو فكرة">
+    <input id="shortIdeaNote" placeholder="ملاحظة (اختياري)">
+  </div>
+  <div id="ideaList" class="video-grid"></div>
+</div>
+
+<div class="container">
+  <div class="section-title">📝 أفكار نصية</div>
+  <div class="input-row">
+    <input id="textIdea" placeholder="اكتب فكرة هنا">
+    <button class="btn" onclick="saveTextIdea()">حفظ</button>
+  </div>
+  <ul id="textIdeaList"></ul>
+</div>
+
+<script>
+// --- Helpers ---
+function extractVideoId(url){
+  // يدعم روابط يوتيوب العادية، youtu.be، embed، و Shorts
+  const patterns=[/v=([^&]+)/,/youtu.be\/([^?&]+)/,/embed\/([^?&]+)/,/shorts\/([^?&]+)/];
+  for(const p of patterns){const m=url.match(p); if(m) return m[1];}
+  return null;
+}
+async function fetchVideoData(videoId){
+  try{const res=await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`); if(!res.ok) return null; return await res.json();}catch{return null}
+}
+function genId(){return 'v_'+Date.now()+'_'+Math.floor(Math.random()*1000)}
+
+// --- Storage ---
+function loadAll(){return JSON.parse(localStorage.getItem('videos')||'{}')}
+function saveAll(d){localStorage.setItem('videos',JSON.stringify(d))}
+
+// --- Render ---
+function renderCard(video,type){
+  const container=document.getElementById(type+'List');
+  const card=document.createElement('div');
+  card.className='video-card';
+  card.setAttribute('data-id',video.id);
+
+  // تطبيق فئات التلوين (بدلاً من الشفافية)
+  if(video.recorded) {
+    card.classList.add('video-card-status-recorded');
+  } else if(video.rejected) {
+    card.classList.add('video-card-status-rejected');
+  }
+
+  const del=document.createElement('button');
+  del.className='delete-btn';
+  del.textContent='X';
+  del.onclick=()=>deleteVideo(video.id);
+  card.appendChild(del);
+
+  const statusLabel=document.createElement('div');
+  statusLabel.className='status-label';
+  if(video.rejected){statusLabel.classList.add('status-rejected'); statusLabel.textContent='مرفوض'}
+  else if(video.recorded){statusLabel.classList.add('status-recorded'); statusLabel.textContent='تم التصوير'}
+  card.appendChild(statusLabel);
+
+  const img=document.createElement('img'); img.src=video.thumbnail;
+  const info=document.createElement('div');
+  info.innerHTML=`<h4 style="margin:0 0 6px">${video.title}</h4>
+    <div class='note-box'>${video.note||'لا توجد ملاحظة'}</div>
+    <div style='margin-top:8px'><a class='play-btn' href='${video.url}' target='_blank'><span class='play-icon'></span><span>تشغيل الفيديو</span></a></div>`;
+
+  const controls=document.createElement('div'); controls.className='status-controls';
+  const btnRec=document.createElement('button'); btnRec.className='btn-rec'; btnRec.textContent='✓ تصوير'; btnRec.onclick=()=>toggleRecorded(video.id);
+  const btnRej=document.createElement('button'); btnRej.className='btn-rej'; btnRej.textContent='✕ رفض'; btnRej.onclick=()=>toggleRejected(video.id);
+  controls.appendChild(btnRec); controls.appendChild(btnRej);
+
+  card.appendChild(img); card.appendChild(info); card.appendChild(controls);
+  container.appendChild(card);
+}
+
+function clearAllRender(){['long','react','act','idea'].forEach(t=>document.getElementById(t+'List').innerHTML='')}
+function renderAll(){clearAllRender(); const data=loadAll(); for(const t of Object.keys(data)){data[t].forEach(v=>renderCard(v,t))} renderTextIdeas()}
+
+// --- Save video ---
+async function saveVideo(type){
+  let linkId, noteId;
+  if (type === 'long') {
+    linkId = 'longLink';
+    noteId = 'longNote';
+  } else if (type === 'react') {
+    linkId = 'shortReact';
+    noteId = 'shortReactNote';
+  } else if (type === 'act') {
+    linkId = 'shortAct';
+    noteId = 'shortActNote';
+  } else if (type === 'idea') {
+    linkId = 'shortIdea';
+    noteId = 'shortIdeaNote';
+  } else {
+    return;
+  }
+  
+  const linkEl = document.getElementById(linkId);
+  const noteEl = document.getElementById(noteId);
+  const link = linkEl.value.trim();
+  const note = noteEl.value.trim();
+  
+  if (!link) {
+    alert('الرجاء إدخال رابط فيديو.');
+    return;
+  }
+  
+  const videoId = extractVideoId(link);
+  if (!videoId) {
+    alert('الرابط غير صالح. الرجاء التأكد من أنه رابط يوتيوب صحيح.');
+    return;
+  }
+  
+  const videoData = await fetchVideoData(videoId);
+  if (!videoData || videoData.error) {
+    alert('تعذر جلب بيانات الفيديو. ربما الرابط غير موجود أو خاص.');
+    return;
+  }
+  
+  const allData = loadAll();
+  const newVideo = {
+    id: genId(),
+    type: type,
+    url: link,
+    videoId: videoId,
+    title: videoData.title || 'فيديو غير معنون',
+    thumbnail: videoData.thumbnail_url || '',
+    note: note,
+    recorded: false,
+    rejected: false
+  };
+  
+  if (!allData[type]) {
+    allData[type] = [];
+  }
+  allData[type].unshift(newVideo);
+  saveAll(allData);
+  
+  renderAll();
+  linkEl.value = '';
+  noteEl.value = '';
+}
+
+// --- Text Ideas Logic ---
+
+function loadTextIdeas() {
+  return JSON.parse(localStorage.getItem('textIdeas') || '[]');
+}
+
+function saveTextIdeas(ideas) {
+  localStorage.setItem('textIdeas', JSON.stringify(ideas));
+}
+
+function renderTextIdeas() {
+  const ul = document.getElementById('textIdeaList');
+  ul.innerHTML = '';
+  const ideas = loadTextIdeas();
+  
+  ideas.forEach((idea, index) => {
+    const li = document.createElement('li');
+    li.style.display = 'flex';
+    li.style.justifyContent = 'space-between';
+    li.style.alignItems = 'center';
+    li.style.padding = '8px 0';
+
+    const textSpan = document.createElement('span');
+    textSpan.textContent = idea;
+    
+    const delBtn = document.createElement('button');
+    delBtn.textContent = 'حذف';
+    delBtn.style.background = '#ff3b3b';
+    delBtn.style.color = '#fff';
+    delBtn.style.border = 'none';
+    delBtn.style.borderRadius = '6px';
+    delBtn.style.padding = '4px 8px';
+    delBtn.style.cursor = 'pointer';
+    delBtn.onclick = () => deleteTextIdea(index);
+    
+    li.appendChild(textSpan);
+    li.appendChild(delBtn);
+    ul.appendChild(li);
+  });
+}
+
+function saveTextIdea() {
+  const inputEl = document.getElementById('textIdea');
+  const idea = inputEl.value.trim();
+  
+  if (idea) {
+    const ideas = loadTextIdeas();
+    ideas.unshift(idea);
+    saveTextIdeas(ideas);
+    renderTextIdeas();
+    inputEl.value = '';
+  } else {
+    alert('الرجاء كتابة فكرة نصية لحفظها.');
+  }
+}
+
+function deleteTextIdea(index) {
+  const ideas = loadTextIdeas();
+  ideas.splice(index, 1);
+  saveTextIdeas(ideas);
+  renderTextIdeas();
+}
+
+
+// --- Toggles for Video Status ---
+
+function toggleRecorded(id) {
+    const allData = loadAll();
+    for (const type in allData) {
+        const index = allData[type].findIndex(v => v.id === id);
+        if (index !== -1) {
+            const video = allData[type][index];
+            video.recorded = !video.recorded;
+            video.rejected = false; 
+            saveAll(allData);
+            renderAll(); 
+            return;
+        }
+    }
+}
+
+function toggleRejected(id) {
+    const allData = loadAll();
+    for (const type in allData) {
+        const index = allData[type].findIndex(v => v.id === id);
+        if (index !== -1) {
+            const video = allData[type][index];
+            video.rejected = !video.rejected;
+            video.recorded = false; 
+            saveAll(allData);
+            renderAll(); 
+            return;
+        }
+    }
+}
+
+function deleteVideo(id) {
+    if (!confirm('هل أنت متأكد من حذف هذا الفيديو؟')) {
+        return;
+    }
+    const allData = loadAll();
+    let found = false;
+    for (const type in allData) {
+        const initialLength = allData[type].length;
+        allData[type] = allData[type].filter(v => v.id !== id);
+        if (allData[type].length < initialLength) {
+            found = true;
+            break;
+        }
+    }
+    if (found) {
+        saveAll(allData);
+        renderAll();
+    }
+}
+
+// --- Dark Mode Logic ---
+
+function toggleNight() {
+  document.body.classList.toggle('night');
+  localStorage.setItem('nightMode', document.body.classList.contains('night'));
+}
+
+function init() {
+  if (localStorage.getItem('nightMode') === 'true') {
+    document.body.classList.add('night');
+  }
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
