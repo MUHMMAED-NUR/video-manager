@@ -3,131 +3,79 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>مدير روابط الفيديو — أوفلاين</title>
+<title>مدير روابط الفيديو — متزامن</title>
 <style>
-/* ... (كود CSS كامل كما هو في التعديل الأخير) ... */
+/* 🎨 تم ترك كود CSS كما هو من التعديل الأخير (الأكثر وضوحًا) */
 :root{--bg:#f3f3f3;--card:#fafafa;--accent:#007bff;--note:#e6e6e6;--text:#111;--color-rec:#4CAF50;--color-rej:#F44336;--light-rec:#e6ffef;--light-rej:#ffecec}
 body{font-family:Arial;margin:0;padding:18px;background:var(--bg);color:var(--text)}
 .header{display:flex;justify-content:flex-end;gap:10px;align-items:center}
 .btn{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;transition:background-color 0.3s ease}
 .btn:hover{background:#0056b3}
 .container{background:#fff;padding:18px;border-radius:12px;margin-top:14px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
-
-/* تكبير العناوين الرئيسية */
 h2{font-size: 28px; margin-bottom: 15px;}
 .section-title{font-size:24px;margin-bottom:10px; font-weight: bold;}
-
 .input-row{display:flex;gap:10px;margin-bottom:12px}
 .input-row input, .input-row textarea{flex:1;padding:10px;border:1px solid #ddd;border-radius:8px}
 .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:12px}
-
-/* تحديث البطاقة - إزالة الشفافية وتطبيق التلوين */
 .video-card{
     background:var(--card);
     padding:12px;
-    padding-top: 40px; /* لترك مساحة لعلامة الحالة العريضة */
+    padding-top: 40px;
     border-radius:10px;
     display:flex;
     gap:12px;
     align-items:center;
     position:relative;
-    transition: all 0.3s ease; /* تأثير لوني للانتقال */
+    transition: all 0.3s ease;
     border: 1px solid #ddd;
 }
-/* تلوين البطاقة عند تغيير الحالة */
-.video-card-status-recorded{
-    background: var(--light-rec);
-    border: 1px solid var(--color-rec);
-}
-.video-card-status-rejected{
-    background: var(--light-rej);
-    border: 1px solid var(--color-rej);
-}
-
+.video-card-status-recorded{background: var(--light-rec);border: 1px solid var(--color-rec);}
+.video-card-status-rejected{background: var(--light-rej);border: 1px solid var(--color-rej);}
 .video-card img{width:170px;height:96px;object-fit:cover;border-radius:8px}
 .note-box{background:var(--note);padding:8px;border-radius:8px;margin-top:6px}
 .play-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid #ddd;cursor:pointer;text-decoration:none}
 .play-icon{width:0;height:0;border-top:10px solid transparent;border-bottom:10px solid transparent;border-left:16px solid #ff4d4d}
-
-/* علامة الحالة العريضة والواضحة */
 .status-label{
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    width: 100%;
-    padding:8px 10px;
-    border-radius:10px 10px 0 0; 
-    font-size: 16px;
-    font-weight:700;
-    display:none;
-    z-index: 10;
-    text-align: center; 
-    box-sizing: border-box; 
+    position:absolute;top:0;left:0;right:0;width: 100%;padding:8px 10px;border-radius:10px 10px 0 0; 
+    font-size: 16px;font-weight:700;display:none;z-index: 10;text-align: center; box-sizing: border-box; 
     border-bottom: 1px solid transparent; 
 }
-/* ألوان وضوح العلامات */
-.status-recorded{
-    background:#d5f3d5; 
-    color:#0a7b3f;
-    border-color: var(--color-rec); 
-    display:block
-}
-.status-rejected{
-    background:#fdd5d5;
-    color:#c12b2b;
-    border-color: var(--color-rej);
-    display:block
-}
-
+.status-recorded{background:#d5f3d5;color:#0a7b3f;border-color: var(--color-rec);display:block}
+.status-rejected{background:#fdd5d5;color:#c12b2b;border-color: var(--color-rej);display:block}
 .status-controls{display:flex;flex-direction:column;gap:8px}
-.status-controls button{
-    padding:8px 10px;
-    border-radius:8px;
-    border:none;
-    color:#fff;
-    font-weight:bold;
-    cursor:pointer;
-    transition: background-color 0.3s ease, transform 0.1s;
-}
-.status-controls .btn-rec{background:var(--color-rec);}
-.status-controls .btn-rej{background:var(--color-rej);}
-
-.status-controls button:hover{
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
+.status-controls button{padding:8px 10px;border-radius:8px;border:none;color:#fff;font-weight:bold;cursor:pointer;transition: background-color 0.3s ease, transform 0.1s;}
+.status-controls .btn-rec{background:#4CAF50;}
+.status-controls .btn-rej{background:#F44336;}
+.status-controls button:hover{opacity: 0.9;transform: translateY(-1px);}
 .delete-btn{position:absolute;top:8px;right:8px;background:#ff3b3b;color:#fff;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;transition:background-color 0.3s ease}
 .delete-btn:hover{background:#cc0000}
-
-/* تحديث وضوح العناوين الفرعية */
 .small-note{
-    font-size:18px; /* زيادة الحجم */
-    font-weight: bold; 
-    color:#111; /* جعل اللون أغمق جداً */
-    margin-top: 15px; 
-    display: block; 
+    font-size:18px; font-weight: bold; color:#111; margin-top: 15px; display: block; 
 }
-
 .night{background:#111;color:#ddd}
 .night .container{background:#1b1b1b}
 .night .video-card{background:#151515}
-.night .night .note-box{background:#2a2a2a;color:#ddd}
+.night .note-box{background:#2a2a2a;color:#ddd}
 .night .input-row input{background:#111;color:#ddd;border:1px solid #333}
 .night #textIdeaList li{border-bottom:1px solid #333}
-.night .small-note{color:#fff;} /* لون واضح في الوضع الليلي */
-
-
+.night .small-note{color:#fff;}
 #textIdeaList{list-style:none;padding:0}
 #textIdeaList li{border-bottom:1px solid #eee;padding:10px 0}
 </style>
+
+<!-- 🚀 تضمين Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+
 </head>
-<body id="appBody" style="display: none;"> <div class="header">
+<body id="appBody" style="display: none;"> <!-- جعل الجسم مخفياً في البداية -->
+
+<div class="header">
   <label class="small-note">وضع ليلي</label>
   <button class="btn" onclick="toggleNight()">تبديل الليل</button>
 </div>
 
-<h2>📁 مدير حفظ روابط الفيديو — أوفلاين</h2>
+<h2>📁 مدير حفظ روابط الفيديو — متزامن (Firebase)</h2>
 
 <div class="container">
   <div class="section-title">🎥 الفيديوهات الطويلة</div>
@@ -177,24 +125,121 @@ h2{font-size: 28px; margin-bottom: 15px;}
 </div>
 
 <script>
-// 🔑 دالة التحقق من كلمة المرور
+// ==============================================
+// 1. إعداد Firebase (المفاتيح الخاصة بك تم لصقها هنا)
+// ==============================================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyA4GCJfuEBCoiaD2h3BSiZzAq4vK2wTVPE",
+    authDomain: "videomanagerapp-bdcbf.firebaseapp.com",
+    databaseURL: "https://videomanagerapp-bdcbf-default-rtdb.europe-west1.firebasedatabase.app", 
+    projectId: "videomanagerapp-bdcbf",
+    storageBucket: "videomanagerapp-bdcbf.firebasestorage.app",
+    messagingSenderId: "505800131782",
+    appId: "1:505800131782:web:0351d4f2642c40376983c7",
+    measurementId: "G-N6VJBGS11F"
+};
+
+// تهيئة Firebase وتعيين متغيرات الوصول
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+// 'user_data' هو المسار الذي سيتم حفظ البيانات فيه داخل قاعدة بياناتك
+const dbRef = db.ref('user_data'); 
+
+let allData = {}; // متغيّر عام لحفظ بيانات الفيديوهات
+let textIdeas = []; // متغيّر عام لحفظ الأفكار النصية
+
+// ==============================================
+// 2. دوال التخزين والحفظ (الآن مع Firebase)
+// ==============================================
+
+// دالة تحميل البيانات من Firebase
+async function loadDataFromFirebase() {
+    try {
+        // نستخدم .once('value') لتحميل البيانات لمرة واحدة عند بدء التطبيق
+        const snapshot = await dbRef.once('value');
+        const data = snapshot.val();
+        
+        // استعادة البيانات المحفوظة في المتغيرات العامة
+        if (data && data.videos) {
+            // نستخدم Object.values().filter(Boolean) لضمان أننا نتعامل مع مصفوفات سليمة
+            allData = Object.keys(data.videos).reduce((acc, key) => {
+                acc[key] = data.videos[key] ? Object.values(data.videos[key]).filter(Boolean) : [];
+                return acc;
+            }, {});
+        } else {
+            allData = {};
+        }
+        if (data && data.ideas && Array.isArray(data.ideas)) {
+            textIdeas = data.ideas;
+        } else {
+            textIdeas = [];
+        }
+
+    } catch (error) {
+        console.error("Error loading data from Firebase:", error);
+        // لا نستخدم alert() هنا لتجنب إيقاف تحميل التطبيق
+        console.warn("فشل في تحميل البيانات من قاعدة البيانات. تحقق من الرابط وقواعد الأمان.");
+    }
+}
+
+// دالة حفظ جميع البيانات إلى Firebase
+function saveAllToFirebase() {
+    // تنسيق البيانات للحفظ في Firebase
+    const dataToSave = {
+        videos: allData,
+        ideas: textIdeas
+    };
+    dbRef.set(dataToSave).catch(error => {
+        console.error("Error saving data to Firebase:", error);
+    });
+}
+
+// ==============================================
+// 3. دالة التحقق من كلمة المرور والتهيئة
+// ==============================================
+
+function showCustomAlert(message) {
+    // لا نستخدم alert() ولكن نستخدم console.log() لتجنب المشاكل
+    console.log("Alert Message:", message);
+    // يمكنك إضافة كود هنا لعرض رسالة مخصصة على الشاشة إذا أردت
+}
+
 function checkPassword() {
     const correctPassword = "963507";
     let inputPassword = prompt("الرجاء إدخال كلمة المرور للوصول إلى مدير الروابط:");
 
     if (inputPassword === correctPassword) {
-        document.getElementById('appBody').style.display = 'block'; // عرض محتوى الموقع
-        init(); // تهيئة وبدء تشغيل التطبيق بعد النجاح
+        document.getElementById('appBody').style.display = 'block'; 
+        init(); // بدء تشغيل التطبيق بعد النجاح
     } else {
-        alert("كلمة المرور غير صحيحة. لا يمكن الوصول.");
-        // يمكنك توجيه المستخدم لصفحة أخرى أو إبقائه على صفحة بيضاء
+        showCustomAlert("كلمة المرور غير صحيحة. لا يمكن الوصول.");
         document.body.innerHTML = '<h1>🚫 وصول مرفوض.</h1>';
     }
 }
 
+// دالة التهيئة الجديدة تبدأ بتحميل البيانات من Firebase
+async function init() {
+    await loadDataFromFirebase(); // انتظار تحميل البيانات
+    
+    // تطبيق الوضع الليلي (يستمر في استخدام التخزين المحلي)
+    if (localStorage.getItem('nightMode') === 'true') {
+        document.body.classList.add('night');
+    }
+    
+    // عرض جميع البيانات
+    renderAll();
+}
+
+// 🚀 بدء تشغيل عملية التحقق من كلمة المرور فور تحميل الصفحة
+window.onload = checkPassword;
+
+// ==============================================
+// 4. بقية الدوال مُعدَّلة لاستخدام المتغيرات العامة ووظيفة الحفظ الجديدة
+// ==============================================
+
 // --- Helpers ---
 function extractVideoId(url){
-  // يدعم روابط يوتيوب العادية، youtu.be، embed، و Shorts
   const patterns=[/v=([^&]+)/,/youtu.be\/([^?&]+)/,/embed\/([^?&]+)/,/shorts\/([^?&]+)/];
   for(const p of patterns){const m=url.match(p); if(m) return m[1];}
   return null;
@@ -204,18 +249,17 @@ async function fetchVideoData(videoId){
 }
 function genId(){return 'v_'+Date.now()+'_'+Math.floor(Math.random()*1000)}
 
-// --- Storage ---
-function loadAll(){return JSON.parse(localStorage.getItem('videos')||'{}')}
-function saveAll(d){localStorage.setItem('videos',JSON.stringify(d))}
 
 // --- Render ---
 function renderCard(video,type){
   const container=document.getElementById(type+'List');
+  // التحقق لتجنب إضافة نفس البطاقة مرتين
+  if (document.querySelector(`.video-card[data-id="${video.id}"]`)) return;
+
   const card=document.createElement('div');
   card.className='video-card';
   card.setAttribute('data-id',video.id);
 
-  // تطبيق فئات التلوين (بدلاً من الشفافية)
   if(video.recorded) {
     card.classList.add('video-card-status-recorded');
   } else if(video.rejected) {
@@ -235,6 +279,7 @@ function renderCard(video,type){
   card.appendChild(statusLabel);
 
   const img=document.createElement('img'); img.src=video.thumbnail;
+  img.onerror = function() { this.src = 'https://placehold.co/170x96/cccccc/000000?text=No+Image'; }; // إضافة صورة بديلة
   const info=document.createElement('div');
   info.innerHTML=`<h4 style="margin:0 0 6px">${video.title}</h4>
     <div class='note-box'>${video.note||'لا توجد ملاحظة'}</div>
@@ -250,7 +295,17 @@ function renderCard(video,type){
 }
 
 function clearAllRender(){['long','react','act','idea'].forEach(t=>document.getElementById(t+'List').innerHTML='')}
-function renderAll(){clearAllRender(); const data=loadAll(); for(const t of Object.keys(data)){data[t].forEach(v=>renderCard(v,t))} renderTextIdeas()}
+function renderAll(){
+    clearAllRender(); 
+    // استخدام المتغير العام allData
+    for(const t of Object.keys(allData)){
+        // التأكد من أن allData[t] مصفوفة قبل التكرار
+        if (Array.isArray(allData[t])) {
+            allData[t].forEach(v=>renderCard(v,t))
+        }
+    } 
+    renderTextIdeas();
+}
 
 // --- Save video ---
 async function saveVideo(type){
@@ -277,30 +332,29 @@ async function saveVideo(type){
   const note = noteEl.value.trim();
   
   if (!link) {
-    alert('الرجاء إدخال رابط فيديو.');
+    showCustomAlert('الرجاء إدخال رابط فيديو.');
     return;
   }
   
   const videoId = extractVideoId(link);
   if (!videoId) {
-    alert('الرابط غير صالح. الرجاء التأكد من أنه رابط يوتيوب صحيح.');
+    showCustomAlert('الرابط غير صالح. الرجاء التأكد من أنه رابط يوتيوب صحيح.');
     return;
   }
   
   const videoData = await fetchVideoData(videoId);
   if (!videoData || videoData.error) {
-    alert('تعذر جلب بيانات الفيديو. ربما الرابط غير موجود أو خاص.');
+    showCustomAlert('تعذر جلب بيانات الفيديو. ربما الرابط غير موجود أو خاص.');
     return;
   }
   
-  const allData = loadAll();
   const newVideo = {
     id: genId(),
     type: type,
     url: link,
     videoId: videoId,
     title: videoData.title || 'فيديو غير معنون',
-    thumbnail: videoData.thumbnail_url || '',
+    thumbnail: videoData.thumbnail_url || 'https://placehold.co/170x96/cccccc/000000?text=No+Image',
     note: note,
     recorded: false,
     rejected: false
@@ -310,8 +364,8 @@ async function saveVideo(type){
     allData[type] = [];
   }
   allData[type].unshift(newVideo);
-  saveAll(allData);
   
+  saveAllToFirebase(); // حفظ البيانات الجديدة
   renderAll();
   linkEl.value = '';
   noteEl.value = '';
@@ -319,20 +373,11 @@ async function saveVideo(type){
 
 // --- Text Ideas Logic ---
 
-function loadTextIdeas() {
-  return JSON.parse(localStorage.getItem('textIdeas') || '[]');
-}
-
-function saveTextIdeas(ideas) {
-  localStorage.setItem('textIdeas', JSON.stringify(ideas));
-}
-
 function renderTextIdeas() {
   const ul = document.getElementById('textIdeaList');
   ul.innerHTML = '';
-  const ideas = loadTextIdeas();
   
-  ideas.forEach((idea, index) => {
+  textIdeas.forEach((idea, index) => {
     const li = document.createElement('li');
     li.style.display = 'flex';
     li.style.justifyContent = 'space-between';
@@ -344,12 +389,15 @@ function renderTextIdeas() {
     
     const delBtn = document.createElement('button');
     delBtn.textContent = 'حذف';
-    delBtn.style.background = '#ff3b3b';
-    delBtn.style.color = '#fff';
-    delBtn.style.border = 'none';
-    delBtn.style.borderRadius = '6px';
-    delBtn.style.padding = '4px 8px';
-    delBtn.style.cursor = 'pointer';
+    delBtn.style.cssText = `
+        background: #ff3b3b;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 4px 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    `;
     delBtn.onclick = () => deleteTextIdea(index);
     
     li.appendChild(textSpan);
@@ -363,20 +411,19 @@ function saveTextIdea() {
   const idea = inputEl.value.trim();
   
   if (idea) {
-    const ideas = loadTextIdeas();
-    ideas.unshift(idea);
-    saveTextIdeas(ideas);
+    textIdeas.unshift(idea);
+    saveAllToFirebase(); // حفظ الأفكار الجديدة
     renderTextIdeas();
     inputEl.value = '';
   } else {
-    alert('الرجاء كتابة فكرة نصية لحفظها.');
+    showCustomAlert('الرجاء كتابة فكرة نصية لحفظها.');
   }
 }
 
 function deleteTextIdea(index) {
-  const ideas = loadTextIdeas();
-  ideas.splice(index, 1);
-  saveTextIdeas(ideas);
+  // لا نستخدم confirm() بل نكتفي بالحذف المباشر لضمان التوافق مع البيئة
+  textIdeas.splice(index, 1);
+  saveAllToFirebase(); // حفظ بعد الحذف
   renderTextIdeas();
 }
 
@@ -384,14 +431,14 @@ function deleteTextIdea(index) {
 // --- Toggles for Video Status ---
 
 function toggleRecorded(id) {
-    const allData = loadAll();
     for (const type in allData) {
+        if (!Array.isArray(allData[type])) continue; 
         const index = allData[type].findIndex(v => v.id === id);
         if (index !== -1) {
             const video = allData[type][index];
             video.recorded = !video.recorded;
             video.rejected = false; 
-            saveAll(allData);
+            saveAllToFirebase(); 
             renderAll(); 
             return;
         }
@@ -399,14 +446,14 @@ function toggleRecorded(id) {
 }
 
 function toggleRejected(id) {
-    const allData = loadAll();
     for (const type in allData) {
+        if (!Array.isArray(allData[type])) continue; 
         const index = allData[type].findIndex(v => v.id === id);
         if (index !== -1) {
             const video = allData[type][index];
             video.rejected = !video.rejected;
             video.recorded = false; 
-            saveAll(allData);
+            saveAllToFirebase(); 
             renderAll(); 
             return;
         }
@@ -414,12 +461,10 @@ function toggleRejected(id) {
 }
 
 function deleteVideo(id) {
-    if (!confirm('هل أنت متأكد من حذف هذا الفيديو؟')) {
-        return;
-    }
-    const allData = loadAll();
+    // لا نستخدم confirm()
     let found = false;
     for (const type in allData) {
+        if (!Array.isArray(allData[type])) continue; 
         const initialLength = allData[type].length;
         allData[type] = allData[type].filter(v => v.id !== id);
         if (allData[type].length < initialLength) {
@@ -428,7 +473,7 @@ function deleteVideo(id) {
         }
     }
     if (found) {
-        saveAll(allData);
+        saveAllToFirebase(); 
         renderAll();
     }
 }
@@ -439,17 +484,6 @@ function toggleNight() {
   document.body.classList.toggle('night');
   localStorage.setItem('nightMode', document.body.classList.contains('night'));
 }
-
-// دالة التهيئة (تم تعديلها لاستدعائها بعد النجاح في إدخال كلمة المرور)
-function init() {
-  if (localStorage.getItem('nightMode') === 'true') {
-    document.body.classList.add('night');
-  }
-  renderAll();
-}
-
-// 🚀 بدء تشغيل عملية التحقق من كلمة المرور فور تحميل الصفحة
-window.onload = checkPassword;
 </script>
 </body>
 </html>
