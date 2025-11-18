@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>مدير روابط الفيديو — متزامن</title>
 <style>
 /* 🎨 تنسيق CSS محسن ليكون أكثر احترافية ووضوحاً */
@@ -67,80 +67,104 @@ h2{font-size: 32px; margin-bottom: 25px; color: #343a40; text-align: center;}
 #textIdeaList{list-style:none;padding:0;margin-top:10px;}
 #textIdeaList li{border-bottom:1px solid #eee;padding:12px 0;display:flex;justify-content:space-between;align-items:center;transition:background-color 0.3s}
 .night #textIdeaList li{border-bottom:1px solid #444;}
-
+#password-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0, 0, 0, 0.9); z-index: 1000; 
+    display: flex; justify-content: center; align-items: center; 
+    flex-direction: column; color: white;
+}
+#password-box {
+    background: #333; padding: 30px; border-radius: 15px; text-align: center;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+#password-box input {
+    padding: 10px; margin: 15px 0; border-radius: 8px; border: 1px solid #007bff;
+    width: 200px; font-size: 16px; text-align: center;
+}
 </style>
 
 <!-- 🚀 تضمين Firebase SDK -->
-<!-- يجب استخدام إصدارات محددة ومتطابقة للتأكد من عمل الكود -->
 <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
 
 </head>
-<body id="appBody" style="display: none;"> <!-- جعل الجسم مخفياً في البداية -->
+<body>
 
-<div class="header">
-  <label class="small-note">وضع ليلي</label>
-  <button class="btn" onclick="toggleNight()">تبديل الليل</button>
+<!-- 🔐 شاشة كلمة المرور -->
+<div id="password-overlay">
+    <div id="password-box">
+        <h2>الرجاء إدخال كلمة المرور</h2>
+        <input type="password" id="passwordInput" placeholder="كلمة المرور">
+        <button class="btn" onclick="checkPassword()">دخول</button>
+        <p id="error-message" style="color: #ff4d4d; margin-top: 10px;"></p>
+    </div>
 </div>
 
-<h2>📁 مدير حفظ روابط الفيديو — متزامن (Firebase)</h2>
-
-<div class="container">
-  <div class="section-title">🎥 الفيديوهات الطويلة</div>
-  <div class="input-row">
-    <button class="btn" onclick="saveVideo('long')">حفظ</button>
-    <input id="longLink" placeholder="ألصق رابط الفيديو هنا">
-    <input id="longNote" placeholder="ملاحظة (اختياري)">
-  </div>
-  <div id="longList" class="video-grid"></div>
-</div>
-
-<div class="container">
-  <div class="section-title">🎬 الفيديوهات القصيرة</div>
-
-  <div class="small-note">🟣 ردة فعل</div>
-  <div class="input-row">
-    <button class="btn" onclick="saveVideo('react')">حفظ</button>
-    <input id="shortReact" placeholder="رابط فيديو ردة فعل">
-    <input id="shortReactNote" placeholder="ملاحظة (اختياري)">
-  </div>
-  <div id="reactList" class="video-grid"></div>
-
-  <div class="small-note">🟢 تمثيل</div>
-  <div class="input-row">
-    <button class="btn" onclick="saveVideo('act')">حفظ</button>
-    <input id="shortAct" placeholder="رابط فيديو تمثيل">
-    <input id="shortActNote" placeholder="ملاحظة (اختياري)">
-  </div>
-  <div id="actList" class="video-grid"></div>
-
-  <div class="small-note">🔵 فكرة</div>
-  <div class="input-row">
-    <button class="btn" onclick="saveVideo('idea')">حفظ</button>
-    <input id="shortIdea" placeholder="رابط فيديو فكرة">
-    <input id="shortIdeaNote" placeholder="ملاحظة (اختياري)">
-  </div>
-  <div id="ideaList" class="video-grid"></div>
-</div>
-
-<div class="container">
-  <div class="section-title">📝 أفكار نصية</div>
-  <div class="input-row">
-    <input id="textIdea" placeholder="اكتب فكرة هنا">
-    <button class="btn" onclick="saveTextIdea()">حفظ</button>
-  </div>
-  <ul id="textIdeaList"></ul>
+<!-- محتوى التطبيق يظهر بعد الدخول -->
+<div id="app-content" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+    <div class="header">
+      <label class="small-note">وضع ليلي</label>
+      <button class="btn" onclick="toggleNight()">تبديل الليل</button>
+    </div>
+    
+    <h2>📁 مدير حفظ روابط الفيديو — متزامن (Firebase)</h2>
+    
+    <div class="container">
+      <div class="section-title">🎥 الفيديوهات الطويلة</div>
+      <div class="input-row">
+        <button class="btn" onclick="saveVideo('long')">حفظ</button>
+        <input id="longLink" placeholder="ألصق رابط الفيديو هنا">
+        <input id="longNote" placeholder="ملاحظة (اختياري)">
+      </div>
+      <div id="longList" class="video-grid"></div>
+    </div>
+    
+    <div class="container">
+      <div class="section-title">🎬 الفيديوهات القصيرة</div>
+    
+      <div class="small-note">🟣 ردة فعل</div>
+      <div class="input-row">
+        <button class="btn" onclick="saveVideo('react')">حفظ</button>
+        <input id="shortReact" placeholder="رابط فيديو ردة فعل">
+        <input id="shortReactNote" placeholder="ملاحظة (اختياري)">
+      </div>
+      <div id="reactList" class="video-grid"></div>
+    
+      <div class="small-note">🟢 تمثيل</div>
+      <div class="input-row">
+        <button class="btn" onclick="saveVideo('act')">حفظ</button>
+        <input id="shortAct" placeholder="رابط فيديو تمثيل">
+        <input id="shortActNote" placeholder="ملاحظة (اختياري)">
+      </div>
+      <div id="actList" class="video-grid"></div>
+    
+      <div class="small-note">🔵 فكرة</div>
+      <div class="input-row">
+        <button class="btn" onclick="saveVideo('idea')">حفظ</button>
+        <input id="shortIdea" placeholder="رابط فيديو فكرة">
+        <input id="shortIdeaNote" placeholder="ملاحظة (اختياري)">
+      </div>
+      <div id="ideaList" class="video-grid"></div>
+    </div>
+    
+    <div class="container">
+      <div class="section-title">📝 أفكار نصية</div>
+      <div class="input-row">
+        <input id="textIdea" placeholder="اكتب فكرة هنا">
+        <button class="btn" onclick="saveTextIdea()">حفظ</button>
+      </div>
+      <ul id="textIdeaList"></ul>
+    </div>
 </div>
 
 <script>
 // ==============================================
-// 1. إعداد Firebase (بناءً على البيانات التي قدمتها)
+// 1. إعداد Firebase
 // ==============================================
 
 const firebaseConfig = {
     apiKey: "AIzaSyA4GCJfuEBCoiaD2h3BSiZzAq4vK2wTVPE",
     authDomain: "videomanagerapp-bdcbf.firebaseapp.com",
-    // 🚨 تم التأكد من الرابط الصحيح لقاعدة البيانات في أوروبا 🚨
     databaseURL: "https://videomanagerapp-bdcbf-default-rtdb.europe-west1.firebasedatabase.app", 
     projectId: "videomanagerapp-bdcbf",
     storageBucket: "videomanagerapp-bdcbf.firebasestorage.app",
@@ -152,32 +176,56 @@ const firebaseConfig = {
 // تهيئة Firebase وتعيين متغيرات الوصول
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-// 'user_data' هو المسار الذي سيتم حفظ البيانات فيه
+// المسار الرئيسي للبيانات
 const dbRef = db.ref('user_data'); 
 
 let allData = {long: [], react: [], act: [], idea: []}; 
 let textIdeas = []; 
 
 // ==============================================
-// 2. دوال التخزين والحفظ والتحميل التلقائي (Real-time)
+// 2. دوال التحقق والحماية
 // ==============================================
 
-function showCustomAlert(message) {
-    // استخدام رسالة بسيطة بدلاً من 'alert'
-    console.log("Custom Alert:", message);
-    if (typeof window.alert !== 'undefined') {
-        // نستخدم نافذة المتصفح إذا كانت متاحة (فقط للتنبيه)
-        window.alert(message);
+const CORRECT_PASSWORD = "963507"; 
+
+function showCustomMessage(message, isError = false) {
+    const errorEl = document.getElementById('error-message');
+    if (errorEl) {
+        // إذا كنا على شاشة الدخول، نعرض الرسالة هناك
+        errorEl.textContent = message;
+        errorEl.style.color = isError ? '#ff4d4d' : '#fff';
+    } else {
+        // إذا كنا داخل التطبيق، نستخدم console.log
+        console.log(isError ? "Error: " + message : "Message: " + message);
     }
 }
 
-// دالة لمعالجة البيانات وتحديث الواجهة (تعمل في كل تغيير)
+function checkPassword() {
+    const inputPasswordEl = document.getElementById('passwordInput');
+    const inputPassword = inputPasswordEl.value.trim();
+
+    if (inputPassword === CORRECT_PASSWORD) {
+        document.getElementById('password-overlay').style.display = 'none';
+        document.getElementById('app-content').style.display = 'flex';
+        // 🚀 البدء بتحميل البيانات من Firebase فقط بعد الدخول الناجح
+        initFirebaseSync(); 
+    } else {
+        showCustomMessage("كلمة المرور غير صحيحة. حاول مرة أخرى.", true);
+        inputPasswordEl.value = '';
+    }
+}
+
+// ==============================================
+// 3. دوال التخزين والحفظ والتحميل التلقائي (Real-time)
+// ==============================================
+
+// هذه الدالة هي الوحيدة المسؤولة عن تحميل البيانات من Firebase
 function dataReceived(snapshot) {
     const data = snapshot.val();
     
     // 1. تحديث بيانات الفيديوهات
     if (data && data.videos) {
-        // تحويل البيانات من Firebase (التي قد تكون كائنات/مصفوفات) إلى مصفوفات نظيفة
+        // التأكد من أن البيانات هي مصفوفات نظيفة
         allData = Object.keys(data.videos).reduce((acc, key) => {
             acc[key] = data.videos[key] ? (Array.isArray(data.videos[key]) ? data.videos[key].filter(Boolean) : Object.values(data.videos[key]).filter(Boolean)) : [];
             return acc;
@@ -187,8 +235,9 @@ function dataReceived(snapshot) {
     }
     
     // 2. تحديث بيانات الأفكار النصية
-    if (data && data.ideas && Array.isArray(data.ideas)) {
-        textIdeas = data.ideas;
+    if (data && data.ideas) {
+         // التعامل مع الأفكار النصية كقائمة
+        textIdeas = Array.isArray(data.ideas) ? data.ideas.filter(Boolean) : Object.values(data.ideas).filter(v => typeof v === 'string');
     } else {
         textIdeas = [];
     }
@@ -198,59 +247,52 @@ function dataReceived(snapshot) {
     console.log("✅ تم تحديث الواجهة بنجاح من قاعدة البيانات.");
 }
 
-// دالة حفظ جميع البيانات إلى Firebase
+// هذه الدالة هي الوحيدة المسؤولة عن الحفظ في Firebase
 function saveAllToFirebase() {
+    // بناء كائن البيانات للحفظ
     const dataToSave = {
-        // تصفية المصفوفات لإزالة القيم الخالية (null) التي قد يتركها Firebase
         videos: Object.keys(allData).reduce((acc, key) => {
             acc[key] = allData[key].filter(Boolean);
             return acc;
         }, {}),
         ideas: textIdeas.filter(Boolean)
     };
-    // استخدام set لحفظ جميع البيانات في المسار المحدد
+    
+    // استخدام set لحفظ جميع البيانات في المسار المحدد (وهو ما يسبب المزامنة)
     dbRef.set(dataToSave).catch(error => {
         console.error("Error saving data to Firebase:", error);
-        // رسالة تنبيه واضحة إذا فشل الحفظ بسبب القواعد
-        showCustomAlert("❌ فشل في حفظ البيانات. تأكد أن قواعد الأمان تسمح بالكتابة (.write: true)");
+        showCustomMessage("❌ فشل في حفظ البيانات. تأكد أن قواعد الأمان تسمح بالكتابة.", true);
     });
 }
 
-// ==============================================
-// 3. دالة التحقق من كلمة المرور والتهيئة
-// ==============================================
-
-function checkPassword() {
-    const correctPassword = "963507"; // استخدم كلمة المرور التي تريدها
-    let inputPassword = prompt("الرجاء إدخال كلمة المرور للوصول إلى مدير الروابط:");
-
-    if (inputPassword === correctPassword) {
-        document.getElementById('appBody').style.display = 'flex'; 
-        init(); 
-    } else {
-        showCustomAlert("كلمة المرور غير صحيحة. لا يمكن الوصول.");
-        document.body.innerHTML = '<h1>🚫 وصول مرفوض.</h1>';
-        document.body.style.display = 'block'; 
-    }
-}
-
-function init() {
-    // 🚨 الاستماع في الوقت الفعلي: يقوم بتحميل البيانات عند بدء التشغيل وتحديثها تلقائيًا 🚨
+function initFirebaseSync() {
+    // 🚨 تفعيل الاستماع في الوقت الفعلي 🚨
     dbRef.on('value', dataReceived, (error) => {
         console.error("Firebase Read Error:", error);
-        showCustomAlert("خطأ في الاتصال بقاعدة البيانات. راجع الكونسل.");
+        showCustomMessage("خطأ في الاتصال بقاعدة البيانات. راجع الكونسل.", true);
     });
 
-    // تطبيق الوضع الليلي (يستمر في استخدام التخزين المحلي)
+    // تطبيق الوضع الليلي
     if (localStorage.getItem('nightMode') === 'true') {
         document.body.classList.add('night');
     }
 }
 
-window.onload = checkPassword;
+// إعداد الحدث لضغط مفتاح Enter في حقل كلمة المرور
+document.addEventListener('DOMContentLoaded', () => {
+    const passwordInput = document.getElementById('passwordInput');
+    if (passwordInput) {
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+    }
+});
+
 
 // ==============================================
-// 4. بقية الدوال
+// 4. بقية الدوال (بدون تعديل جوهري)
 // ==============================================
 
 // --- Helpers ---
@@ -268,8 +310,8 @@ function genId(){return 'v_'+Date.now()+'_'+Math.floor(Math.random()*1000)}
 // --- Render ---
 function renderCard(video,type){
   const container=document.getElementById(type+'List');
-  // تجنب إعادة الرسم إذا كان الكارت موجودًا بالفعل
-  if (document.querySelector(`#${type}List > .video-card[data-id="${video.id}"]`)) return;
+  const existingCard = document.querySelector(`#${type}List > .video-card[data-id="${video.id}"]`);
+  if (existingCard) return; 
 
   const card=document.createElement('div');
   card.className='video-card';
@@ -317,7 +359,6 @@ function clearAllRender(){
 
 function renderAll(){
     clearAllRender(); 
-    // التأكد من أن allData يحتوي على المصفوفات قبل التكرار وعرض البيانات
     for(const t of Object.keys(allData)){
         if (Array.isArray(allData[t])) {
             // يتم عرض الفيديوهات بترتيب عكسي (الأحدث أولاً)
@@ -352,22 +393,22 @@ async function saveVideo(type){
   const note = noteEl.value.trim();
   
   if (!link) {
-    showCustomAlert('الرجاء إدخال رابط فيديو.');
+    // نستخدم showCustomMessage هنا
+    console.error('الرجاء إدخال رابط فيديو.'); 
     return;
   }
   
   const videoId = extractVideoId(link);
   if (!videoId) {
-    showCustomAlert('الرابط غير صالح. الرجاء التأكد من أنه رابط يوتيوب صحيح.');
+    console.error('الرابط غير صالح. الرجاء التأكد من أنه رابط يوتيوب صحيح.');
     return;
   }
   
-  // نعرض رسالة أثناء انتظار جلب البيانات
-  showCustomAlert('يتم جلب بيانات الفيديو... (قد يستغرق بضع ثوان)');
+  console.log('يتم جلب بيانات الفيديو...');
 
   const videoData = await fetchVideoData(videoId);
   if (!videoData || videoData.error) {
-    showCustomAlert('تعذر جلب بيانات الفيديو. ربما الرابط غير موجود أو خاص.');
+    console.error('تعذر جلب بيانات الفيديو. ربما الرابط غير موجود أو خاص.');
     return;
   }
   
@@ -383,13 +424,12 @@ async function saveVideo(type){
     rejected: false
   };
   
-  // إضافة الفيديو الجديد في النهاية (لتظهر الأقدم أولاً في المصفوفة الأصلية قبل العرض العكسي)
   if (!allData[type]) {
     allData[type] = [];
   }
   allData[type].push(newVideo);
   
-  // حفظ البيانات بعد الإضافة
+  // 🔑 هذا هو المفتاح: يتم الحفظ في Firebase
   saveAllToFirebase(); 
   linkEl.value = '';
   noteEl.value = '';
@@ -401,9 +441,9 @@ function renderTextIdeas() {
   const ul = document.getElementById('textIdeaList');
   ul.innerHTML = '';
   
-  // عرض الأفكار بترتيب عكسي (الأحدث أولاً)
-  [...textIdeas].reverse().forEach((idea, index) => {
-    // نستخدم الـ index الأصلي هنا للحذف الصحيح
+  const ideasToRender = [...textIdeas].filter(Boolean).reverse();
+
+  ideasToRender.forEach((idea, index) => {
     const originalIndex = textIdeas.length - 1 - index; 
 
     const li = document.createElement('li');
@@ -438,21 +478,22 @@ function saveTextIdea() {
   const idea = inputEl.value.trim();
   
   if (idea) {
-    // إضافة الفكرة في النهاية
     textIdeas.push(idea);
     
-    // حفظ البيانات بعد الإضافة
+    // 🔑 هذا هو المفتاح: يتم الحفظ في Firebase
     saveAllToFirebase(); 
     inputEl.value = '';
   } else {
-    showCustomAlert('الرجاء كتابة فكرة نصية لحفظها.');
+    console.error('الرجاء كتابة فكرة نصية لحفظها.');
   }
 }
 
 function deleteTextIdea(index) {
-  textIdeas.splice(index, 1);
-  // حفظ البيانات بعد الحذف
-  saveAllToFirebase(); 
+  if (index >= 0 && index < textIdeas.length) {
+    textIdeas.splice(index, 1);
+    // 🔑 هذا هو المفتاح: يتم الحفظ في Firebase
+    saveAllToFirebase(); 
+  }
 }
 
 
@@ -466,7 +507,7 @@ function toggleRecorded(id) {
             const video = allData[type][index];
             video.recorded = !video.recorded;
             video.rejected = false; 
-            // حفظ التغيير
+            // 🔑 هذا هو المفتاح: يتم الحفظ في Firebase
             saveAllToFirebase(); 
             return;
         }
@@ -481,7 +522,7 @@ function toggleRejected(id) {
             const video = allData[type][index];
             video.rejected = !video.rejected;
             video.recorded = false; 
-            // حفظ التغيير
+            // 🔑 هذا هو المفتاح: يتم الحفظ في Firebase
             saveAllToFirebase(); 
             return;
         }
@@ -493,7 +534,6 @@ function deleteVideo(id) {
     for (const type in allData) {
         if (!Array.isArray(allData[type])) continue; 
         const initialLength = allData[type].length;
-        // حذف الفيديو من المصفوفة
         allData[type] = allData[type].filter(v => v.id !== id);
         if (allData[type].length < initialLength) {
             found = true;
@@ -501,7 +541,7 @@ function deleteVideo(id) {
         }
     }
     if (found) {
-        // حفظ التغيير
+        // 🔑 هذا هو المفتاح: يتم الحفظ في Firebase
         saveAllToFirebase(); 
     }
 }
